@@ -20,6 +20,8 @@ import { loginStart, setCsrfToken } from "../../features/auth/authSlice";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../../api/client";
 
+const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost/Healthcare/backup-final/backend/public";
+
 export default function LoginPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -31,23 +33,45 @@ export default function LoginPage() {
     role: "patient",
   });
 
-  // ✅ Pre-fetch CSRF token (LOGIC UNCHANGED)
+  // ✅ Pre-fetch CSRF token (Safer debug-friendly approach)
   useEffect(() => {
-    api.get("/csrf-token")
-      .then(res => {
-        let data = res.data;
-        if (typeof data === "string") {
-          try {
-            data = JSON.parse(data);
-          } catch (e) {
-            console.error("Failed to parse CSRF response:", e);
-          }
+    fetch(`${API_BASE}/csrf-token`, {
+      method: "GET",
+      credentials: "include", // Include cookies for CSRF
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then(async (response) => {
+        // Get response as text first for debugging
+        const text = await response.text();
+        console.log("CSRF Response (raw text):", text); // helps debugging
+        
+        // Check if response is OK
+        if (!response.ok) {
+          console.error(`CSRF request failed with status ${response.status}:`, text);
+          return;
         }
-        const token = data?.csrf_token || data?.csrfToken;
-        if (token) dispatch(setCsrfToken(token));
+        
+        // Try to parse as JSON
+        try {
+          const data = JSON.parse(text);
+          const token = data?.csrf_token || data?.csrfToken;
+          if (token) {
+            dispatch(setCsrfToken(token));
+            console.log("CSRF token successfully retrieved");
+          } else {
+            console.warn("CSRF response parsed but no token found:", data);
+          }
+        } catch (e) {
+          console.error("Failed to parse CSRF response as JSON:", e);
+          console.error("Response was:", text);
+        }
       })
-      .catch(err => console.error("❌ Failed to fetch CSRF token:", err));
-  }, []);
+      .catch(err => {
+        console.error("❌ Failed to fetch CSRF token:", err);
+      });
+  }, [dispatch]);
 
   useEffect(() => {
     if (user) navigate("/dashboard");
