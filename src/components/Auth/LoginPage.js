@@ -39,20 +39,18 @@ export default function LoginPage() {
 
   // ✅ ONLY THIS PART IS FIXED (fetch → api)
   useEffect(() => {
-    api
-      .get("/csrf-token")
-      .then((response) => {
-        const token =
-          response?.data?.csrf_token || response?.data?.csrfToken;
+    api.get("/csrf-token")
+  .then((response) => {
+    const token =
+      response?.data?.csrf_token || response?.data?.csrfToken;
 
-        if (token) {
-          dispatch(setCsrfToken(token));
-          console.log("CSRF token successfully retrieved");
-        }
-      })
-      .catch((err) => {
-        console.error("❌ Failed to fetch CSRF token:", err);
-      });
+    if (token) {
+      dispatch(setCsrfToken(token));
+    }
+  })
+  .catch(err => {
+    console.error("Failed to fetch CSRF token", err);
+  });
   }, [dispatch]);
 
   useEffect(() => {
