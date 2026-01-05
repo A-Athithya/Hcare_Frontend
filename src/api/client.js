@@ -3,7 +3,8 @@ import CryptoJS from "crypto-js";
 import store from "../app/store";
 import { loginSuccess, logout } from "../features/auth/authSlice";
 
-const API_BASE = process.env.REACT_APP_API_BASE;
+const API_BASE = "https://hcare-backend.onrender.com/index.php";
+
 const AES_KEY_STR = process.env.REACT_APP_AES_KEY;
 if (!AES_KEY_STR) {
   console.error("FATAL: REACT_APP_AES_KEY is missing in environment variables.");
