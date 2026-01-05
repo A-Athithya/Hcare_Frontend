@@ -39,7 +39,7 @@ export default function LoginPage() {
 
   // ✅ ONLY THIS PART IS FIXED (fetch → api)
   useEffect(() => {
-    api.get("/csrf-token")
+    api.get("/api/csrf-token")
   .then((response) => {
     const token =
       response?.data?.csrf_token || response?.data?.csrfToken;
